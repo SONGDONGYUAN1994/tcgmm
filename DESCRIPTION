@@ -1,0 +1,17 @@
+Package: tcgmm
+Type: Package
+Title: Two Condition Gaussian Mixture Model
+Version: 0.1.0
+Authors@R: c(person("Dongyuan", "Song", email = "dongyuansong@ucla.edu", role = c("aut", "cre")))
+BugReports: https://github.com/SONGDONGYUAN1994/tcgmm/issues
+URL: https://github.com/SONGDONGYUAN1994/tcgmm
+Description: A novel Gaussian Mixture Model for clustering two-condition data.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.0.2
+Depends: R (>= 3.5)
+Imports: stats,
+         extraDistr,
+         mvtnorm,
+         glmnet
