@@ -2,7 +2,7 @@
 % Please edit documentation in R/tcGmmPen.R
 \name{tcGmmPen}
 \alias{tcGmmPen}
-\title{Fit Two-Condition Gaussian Mixture Model}
+\title{Fit Two-Condition Gaussian Mixture Model with Penalization}
 \usage{
 tcGmmPen(
   y,
@@ -25,9 +25,9 @@ tcGmmPen(
 
 \item{thresh}{A numeric value of the converge criteria. Define as the Frobenius norm of the difference of current mean and mean in last iteration. Default is 1e-8.}
 
-\item{lambda}{A numeric value of the lambda parameter for LASSO. Larger lambda means harder penalization on the shift parameter.}
+\item{lambda}{A numeric value of the lambda parameter for Lasso. Larger lambda means harder penalization on the shift parameter.}
 
-\item{verboseN}{A llogical value. Whether to print the iteration number.}
+\item{verboseN}{A logical value. Whether to print the iteration number.}
 }
 \value{
 A list which contains the fitting result.
@@ -40,6 +40,24 @@ A list which contains the fitting result.
 \description{
 This function fits the Two-Condition Gaussian Mixture Model (TCGMM).
 We assume that the latent groups are consistent between two conditions only with shifts in mean parameters.
+}
+\examples{
+library(extraDistr)
+mu1 <- c(5, 7, 9)
+theta1 <- c(1, 2, 0)
+sigma1 <- c(1, 2, 3)
+mu2 <- c(10, 15, 4)
+theta2 <- c(1, 2, 6)
+sigma2 <- c(0.4, 0.2, 0.4)
+mu.mat <- cbind(mu1, mu2)
+delta.mat <- cbind(theta1, theta2)
+sigma.mat <- cbind(sigma1, sigma2)
+dat <- simGen(n = 100, n.feature = 2, n.group = 3, type.prop = c(0.2, 0.3, 0.5),
+mu.mat = mu.mat, sigma.mat = sigma.mat, delta.mat = delta.mat)
+p_int <- c(0.4, 0.3, 0.3)
+z_int <- rmnom(n = 100, size = 1, prob = p_int)
+fit <- tcGmmPen(dat$y, dat$g, zInit = z_int)
+
 }
 \author{
 Dongyuan Song

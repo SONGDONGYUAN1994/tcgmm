@@ -55,19 +55,19 @@ simGen <- function(n, n.feature, n.group, type.prop, con.prop = 0.5, mu.mat, sig
   mu.mat <- data.matrix(mu.mat)
   sigma.mat <- data.matrix(sigma.mat)
 
-  s_control <- (lapply(1:n.group, function(x){
+  s_control <- (lapply(seq_len(n.group), function(x){
     mu <- mu.mat[x, ]
     sigma <- diag(sigma.mat[x, ])
     rmvnorm(n = n, mean = mu, sigma = sigma)
   }))
 
-  s_case <- (lapply(1:n.group, function(x){
+  s_case <- (lapply(seq_len(n.group), function(x){
     mu <- mu.mat[x, ] + delta.mat[x, ]
     sigma <- diag(sigma.mat[x, ])
     rmvnorm(n = n, mean = mu, sigma = sigma)
   }))
 
-  y <- lapply(1:n.group, function(x){
+  y <- lapply(seq_len(n.group), function(x){
     z[, x]*s_control[[x]]*(1-g) + z[, x]*s_case[[x]]*g
   })
 

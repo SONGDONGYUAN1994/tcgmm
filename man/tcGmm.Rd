@@ -17,19 +17,42 @@ tcGmm(y, g, zInit, maxIter = 100, thresh = 1e-08, verboseN = TRUE)
 
 \item{thresh}{A numeric value of the converge criteria. Define as the Frobenius norm of the difference of current mean and mean in last iteration. Default is 1e-8.}
 
-\item{verboseN}{A llogical value. Whether to print the iteration number.}
+\item{verboseN}{A logical value. Whether to print the iteration number.}
+
+\item{mu}{The mean parameter}
+
+\item{sigma}{The standard deviation parameter}
+
+\item{delta}{The shift of mean parameter}
+
+\item{z}{The assignment of groups}
+
+\item{model}{The fitted regression model of each group}
 }
 \value{
-A list which contains the fitting result.
-## mu The mean parameter
-## sigma The standard deviation parameter
-## delta The shift of mean parameter
-## z The assignment of groups
-## model The fitted regression model of each group
+A list with the fitting results
 }
 \description{
 This function fits the Two-Condition Gaussian Mixture Model (TCGMM).
 We assume that the latent groups are consistent between two conditions only with shifts in mean parameters.
+}
+\examples{
+library(extraDistr)
+mu1 <- c(5, 7, 9)
+theta1 <- c(1, 2, 0)
+sigma1 <- c(1, 2, 3)
+mu2 <- c(10, 15, 4)
+theta2 <- c(1, 2, 6)
+sigma2 <- c(0.4, 0.2, 0.4)
+mu.mat <- cbind(mu1, mu2)
+delta.mat <- cbind(theta1, theta2)
+sigma.mat <- cbind(sigma1, sigma2)
+dat <- simGen(n = 100, n.feature = 2, n.group = 3, type.prop = c(0.2, 0.3, 0.5),
+mu.mat = mu.mat, sigma.mat = sigma.mat, delta.mat = delta.mat)
+p_int <- c(0.4, 0.3, 0.3)
+z_int <- rmnom(n = 100, size = 1, prob = p_int)
+fit <- tcGmm(dat$y, dat$g, zInit = z_int)
+
 }
 \author{
 Dongyuan Song
