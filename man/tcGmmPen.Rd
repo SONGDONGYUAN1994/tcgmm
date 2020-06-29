@@ -11,7 +11,8 @@ tcGmmPen(
   maxIter = 100,
   thresh = 1e-16,
   lambda = 1,
-  verboseN = TRUE
+  verboseN = TRUE,
+  type.prop = NULL
 )
 }
 \arguments{
@@ -25,19 +26,24 @@ tcGmmPen(
 
 \item{thresh}{A numeric value of the converge criteria. Define as the Frobenius norm of the difference of current mean and mean in last iteration. Default is 1e-8.}
 
-\item{lambda}{A numeric value of the lambda parameter for Lasso. Larger lambda means harder penalization on the shift parameter.}
-
 \item{verboseN}{A logical value. Whether to print the iteration number.}
+
+\item{type.prop}{A numeric vector specifying fixed type proportions. Default is \code{NULL}.}
 }
 \value{
-A list which contains the fitting result.
-## mu The mean parameter
-## sigma The standard deviation parameter
-## delta The shift of mean parameter
-## z The assignment of groups
-## model The fitted regression model of each group
+A list with the components:
+\describe{
+  \item{\code{mu}}{The mean parameter}
+  \item{\code{sigma}}{The standard deviation parameter}
+  \item{\code{delta}}{The shift of mean parameter}
+  \item{\code{z}}{The assignment of groups}
+  \item{\code{model}}{The fitted regression model of each group}
+}
 }
 \description{
+This function fits the Two-Condition Gaussian Mixture Model (TCGMM) with penalty.
+We assume that the latent groups are consistent between two conditions only with shifts in mean parameters.
+
 This function fits the Two-Condition Gaussian Mixture Model (TCGMM).
 We assume that the latent groups are consistent between two conditions only with shifts in mean parameters.
 }

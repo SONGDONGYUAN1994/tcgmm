@@ -1,7 +1,7 @@
 #' @title Fit Two-Condition Gaussian Mixture Model with Penalization
 #'
 #' @description
-#' This function fits the Two-Condition Gaussian Mixture Model (TCGMM).
+#' This function fits the Two-Condition Gaussian Mixture Model (TCGMM) with penalty.
 #' We assume that the latent groups are consistent between two conditions only with shifts in mean parameters.
 #'
 #' @param y A matrix with rows as samples (cells) and columns as features (genes)
@@ -9,16 +9,21 @@
 #' @param zInit A matrix indicating the assignment of groups with rows as samples and columns as groups
 #' @param maxIter A numeric value of maximum iteration number. Default is 100.
 #' @param thresh A numeric value of the converge criteria. Define as the Frobenius norm of the difference of current mean and mean in last iteration. Default is 1e-8.
-#' @param lambda A numeric value of the lambda parameter for Lasso. Larger lambda means harder penalization on the shift parameter.
 #' @param verboseN A logical value. Whether to print the iteration number.
+#' @param type.prop A numeric vector specifying fixed type proportions. Default is \code{NULL}.
 #'
-#' @return
-#' A list which contains the fitting result.
-#' ## mu The mean parameter
-#' ## sigma The standard deviation parameter
-#' ## delta The shift of mean parameter
-#' ## z The assignment of groups
-#' ## model The fitted regression model of each group
+#' @description
+#' This function fits the Two-Condition Gaussian Mixture Model (TCGMM).
+#' We assume that the latent groups are consistent between two conditions only with shifts in mean parameters.
+#'
+#' @return A list with the components:
+#' \describe{
+#'   \item{\code{mu}}{The mean parameter}
+#'   \item{\code{sigma}}{The standard deviation parameter}
+#'   \item{\code{delta}}{The shift of mean parameter}
+#'   \item{\code{z}}{The assignment of groups}
+#'   \item{\code{model}}{The fitted regression model of each group}
+#' }
 #'
 #' @examples
 #' library(extraDistr)
@@ -43,7 +48,8 @@
 #' @export
 #' @author Dongyuan Song
 
-tcGmmPen <- function(y, g, zInit, maxIter = 100, thresh = 1e-16, lambda = 1, verboseN = TRUE) {
+tcGmmPen <- function(y, g, zInit, maxIter = 100, thresh = 1e-16, lambda = 1, verboseN = TRUE,
+                     type.prop = NULL) {
 
   ## Set dimension
   n <- dim(y)[1]
@@ -100,7 +106,8 @@ tcGmmPen <- function(y, g, zInit, maxIter = 100, thresh = 1e-16, lambda = 1, ver
       })
     })
 
-    p_curr <- colMeans(gamma_curr)
+    if(is.null(type.prop)) p_curr <- colMeans(gamma_curr)
+    else p_curr <- type.prop
 
     gamma_curr <- apply(dat_all, 1, function(x){
 

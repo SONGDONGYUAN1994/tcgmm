@@ -4,7 +4,15 @@
 \alias{tcGmm}
 \title{Fit Two-Condition Gaussian Mixture Model}
 \usage{
-tcGmm(y, g, zInit, maxIter = 100, thresh = 1e-08, verboseN = TRUE)
+tcGmm(
+  y,
+  g,
+  zInit,
+  maxIter = 100,
+  thresh = 1e-08,
+  verboseN = TRUE,
+  type.prop = NULL
+)
 }
 \arguments{
 \item{y}{A matrix with rows as samples (cells) and columns as features (genes)}
@@ -19,18 +27,18 @@ tcGmm(y, g, zInit, maxIter = 100, thresh = 1e-08, verboseN = TRUE)
 
 \item{verboseN}{A logical value. Whether to print the iteration number.}
 
-\item{mu}{The mean parameter}
-
-\item{sigma}{The standard deviation parameter}
-
-\item{delta}{The shift of mean parameter}
-
-\item{z}{The assignment of groups}
-
-\item{model}{The fitted regression model of each group}
+\item{type.prop}{A numeric vector specifying fixed type proportions. Default is \code{NULL}.}
 }
 \value{
-A list with the fitting results
+A list with the components:
+\describe{
+  \item{\code{mu}}{The mean parameter}
+  \item{\code{sigma}}{The standard deviation parameter}
+  \item{\code{delta}}{The shift of mean parameter}
+  \item{\code{z}}{The assignment of groups}
+  \item{\code{model}}{The fitted regression model of each group}
+  \item{\code{LogLik}}{The log likelihood of model}
+}
 }
 \description{
 This function fits the Two-Condition Gaussian Mixture Model (TCGMM).

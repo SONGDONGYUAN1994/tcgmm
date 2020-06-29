@@ -10,14 +10,17 @@
 #' @param maxIter A numeric value of maximum iteration number. Default is 100.
 #' @param thresh A numeric value of the converge criteria. Define as the Frobenius norm of the difference of current mean and mean in last iteration. Default is 1e-8.
 #' @param verboseN A logical value. Whether to print the iteration number.
+#' @param type.prop A numeric vector specifying fixed type proportions. Default is \code{NULL}.
 #'
-#' @return A list with the fitting results
-#' @param mu The mean parameter
-#' @param sigma The standard deviation parameter
-#' @param delta The shift of mean parameter
-#' @param z The assignment of groups
-#' @param model The fitted regression model of each group
-#'
+#' @return A list with the components:
+#' \describe{
+#'   \item{\code{mu}}{The mean parameter}
+#'   \item{\code{sigma}}{The standard deviation parameter}
+#'   \item{\code{delta}}{The shift of mean parameter}
+#'   \item{\code{z}}{The assignment of groups}
+#'   \item{\code{model}}{The fitted regression model of each group}
+#'   \item{\code{LogLik}}{The log likelihood of model}
+#' }
 #'
 #' @examples
 #' library(extraDistr)
@@ -44,7 +47,8 @@
 
 
 
-tcGmm <- function(y, g, zInit, maxIter = 100, thresh = 1e-8, verboseN = TRUE) {
+tcGmm <- function(y, g, zInit, maxIter = 100, thresh = 1e-8, verboseN = TRUE,
+                  type.prop = NULL) {
 
   ## Set dimension
   n <- dim(y)[1]
@@ -76,8 +80,9 @@ tcGmm <- function(y, g, zInit, maxIter = 100, thresh = 1e-8, verboseN = TRUE) {
       fit_list <- lapply(seq_len(n.feature), function(i) {
         lapply(seq_len(n.group), function(j){
           dat <- dat_all
-
-          fit <- glm(dat[, i] ~ dat[, n.feature + 1], family = "gaussian", weights = dat[, n.feature + 1 + j])
+          weight_curr <- dat[, n.feature + 1 + j]
+          weight_curr <- weight_curr/mean(weight_curr)
+          fit <- glm(dat[, i] ~ dat[, n.feature + 1], family = "gaussian", weights = weight_curr)
           fit
         })
       })
@@ -102,7 +107,8 @@ tcGmm <- function(y, g, zInit, maxIter = 100, thresh = 1e-8, verboseN = TRUE) {
       })
     })
 
-    p_curr <- colMeans(gamma_curr)
+    if(is.null(type.prop)) p_curr <- colMeans(gamma_curr)
+    else p_curr <- type.prop
 
     gamma_curr <- apply(dat_all, 1, function(x){
 
@@ -124,17 +130,42 @@ tcGmm <- function(y, g, zInit, maxIter = 100, thresh = 1e-8, verboseN = TRUE) {
       gamma
     }
     )
+
     gamma_curr <- t(gamma_curr)
+
+    ## Log Likelihood
+    d_curr <- apply(dat_all, 1, function(x){
+
+      y_i <- x[1:n.feature]
+      g_i <- x[n.feature + 1]
+
+      ## Calculate density
+      if(g_i == 0) {
+        d <- sapply(1:n.group, function(i){
+          mvtnorm::dmvnorm(y_i, mean = mu_curr[i, ], sigma = diag(sigma_curr[i, ]))
+        })}
+      else {
+        d <- sapply(1:n.group, function(i){
+          mvtnorm::dmvnorm(y_i, mean = mu_curr[i, ] + delta_curr[i, ], sigma = diag(sigma_curr[i, ]))})
+      }
+      d_i <- sapply(1:n.group, function(i){
+        p_curr[i]*d[i]
+      })
+      d_i
+    }
+    )
+
+    if(verboseN) {
+      cat(paste0("Iteration ", k, "\n"))
+      cat(sum(log(colSums(d_curr))))
+      cat("\n")
+    }
+
     group_row <- rep(0, n.group)
     z_curr <- t(apply(gamma_curr, 1, function(x) {
       group_row[which.max(x)] <- 1
       group_row
     }))
-
-
-    if(verboseN) {
-      cat(paste0("Iteration ", k, "\n"))
-    }
 
     if(k >= 2 && norm(mu_curr - mu_old, "F") < thresh && identical(z_old, z_curr)) {
       message(paste0("Iteration ends in ", k, "\n")); break}
@@ -143,6 +174,7 @@ tcGmm <- function(y, g, zInit, maxIter = 100, thresh = 1e-8, verboseN = TRUE) {
   rownames(delta_curr) <- NULL
   rownames(sigma_curr) <- NULL
 
-  res <- list(mu = mu_curr, delta = delta_curr, sigma = sigma_curr, z = z_curr, model_fit = fit_list)
+  res <- list(mu = mu_curr, delta = delta_curr, sigma = sigma_curr, z = z_curr,
+              model_fit = fit_list, LogLik = sum(log(colSums(d_curr))))
   return(res)
 }
